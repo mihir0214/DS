@@ -1,0 +1,140 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct node {
+    int regNo;
+    char name[30];
+    struct node *next;
+};
+
+struct node *head = NULL;
+
+void add() {
+    struct node *n, *t;
+    n = malloc(sizeof(struct node));
+
+    printf("Enter RegNo and Name: ");
+    scanf("%d %29s", &n->regNo, n->name);
+    n->next = NULL;
+
+    if (head == NULL)
+        head = n;
+    else {
+        t = head;
+        while (t->next != NULL)
+            t = t->next;
+        t->next = n;
+    }
+    printf("Student added.\n");
+}
+
+void delete() {
+    struct node *t = head, *p = NULL;
+    int r;
+
+    printf("Enter RegNo to delete: ");
+    scanf("%d", &r);
+
+    while (t != NULL && t->regNo != r) {
+        p = t;
+        t = t->next;
+    }
+
+    if (t == NULL) {
+        printf("Student not found.\n");
+        return;
+    }
+
+    if (p == NULL)
+        head = t->next;
+    else
+        p->next = t->next;
+
+    free(t);
+    printf("Student deleted.\n");
+}
+
+void display() {
+    struct node *t = head;
+
+    if (t == NULL) {
+        printf("No students registered.\n");
+        return;
+    }
+
+    while (t != NULL) {
+        printf("%d %s\n", t->regNo, t->name);
+        t = t->next;
+    }
+}
+
+void count() {
+    struct node *t = head;
+    int c = 0;
+
+    while (t != NULL) {
+        c++;
+        t = t->next;
+    }
+    printf("Total students = %d\n", c);
+}
+
+void sort() {
+    struct node *i, *j;
+    int r;
+    char n[30];
+
+    for (i = head; i != NULL; i = i->next) {
+        for (j = i->next; j != NULL; j = j->next) {
+            if (i->regNo > j->regNo) {
+                r = i->regNo;
+                i->regNo = j->regNo;
+                j->regNo = r;
+
+                strcpy(n, i->name);
+                strcpy(i->name, j->name);
+                strcpy(j->name, n);
+            }
+        }
+    }
+    printf("List sorted.\n");
+}
+
+void reverse() {
+    struct node *p = NULL, *c = head, *n;
+
+    while (c != NULL) {
+        n = c->next;
+        c->next = p;
+        p = c;
+        c = n;
+    }
+
+    head = p;
+    printf("List reversed.\n");
+}
+
+int main() {
+    int ch;
+
+    do {
+        printf("\n1.Add 2.Delete 3.Display");
+        printf("\n4.Count 5.Sort 6.Reverse 7.Exit");
+        printf("\nEnter choice: ");
+        scanf("%d", &ch);
+
+        switch (ch) {
+            case 1: add(); break;
+            case 2: delete(); break;
+            case 3: display(); break;
+            case 4: count(); break;
+            case 5: sort(); break;
+            case 6: reverse(); break;
+            case 7: printf("Exit.\n"); break;
+            default: printf("Invalid choice.\n");
+        }
+    } while (ch != 7);
+
+    return 0;
+}

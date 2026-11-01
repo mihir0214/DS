@@ -1,0 +1,302 @@
+
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+char stack[50][50];
+int top = -1;
+
+void push(char x[])
+{
+    strcpy(stack[++top], x);
+}
+
+void pop(char x[])
+{
+    strcpy(x, stack[top--]);
+}
+
+int priority(char x)
+{
+    if(x == '^')
+        return 3;
+    if(x == '*' || x == '/')
+        return 2;
+    if(x == '+' || x == '-')
+        return 1;
+
+    return 0;
+}
+
+// 1. INFIX TO POSTFIX
+void infixPostfix(char exp[])
+{
+    char s[50], out[50];
+    int t = -1, j = 0, i;
+    char x;
+
+    for(i = 0; exp[i] != '\0'; i++)
+    {
+        x = exp[i];
+
+        if(isalnum(x))
+            out[j++] = x;
+
+        else if(x == '(')
+            s[++t] = x;
+
+        else if(x == ')')
+        {
+            while(t != -1 && s[t] != '(')
+                out[j++] = s[t--];
+
+            t--;
+        }
+        else
+        {
+            while(t != -1 && s[t] != '(' &&
+                  priority(s[t]) >= priority(x))
+                out[j++] = s[t--];
+
+            s[++t] = x;
+        }
+    }
+
+    while(t != -1)
+        out[j++] = s[t--];
+
+    out[j] = '\0';
+
+    printf("Postfix: %s", out);
+}
+
+// 2. INFIX TO PREFIX
+void infixPrefix(char exp[])
+{
+    char rev[50], out[50], s[50];
+    int n = strlen(exp), i, t = -1, j = 0;
+
+    for(i = 0; i < n; i++)
+    {
+        rev[i] = exp[n-1-i];
+
+        if(rev[i] == '(') rev[i] = ')';
+        else if(rev[i] == ')') rev[i] = '(';
+    }
+
+    rev[n] = '\0';
+
+    for(i = 0; rev[i] != '\0'; i++)
+    {
+        char x = rev[i];
+
+        if(isalnum(x))
+            out[j++] = x;
+
+        else if(x == '(')
+            s[++t] = x;
+
+        else if(x == ')')
+        {
+            while(t != -1 && s[t] != '(')
+                out[j++] = s[t--];
+
+            t--;
+        }
+        else
+        {
+            while(t != -1 && s[t] != '(' &&
+                  (priority(s[t]) > priority(x) ||
+                  (priority(s[t]) == priority(x) && x == '^')))
+                out[j++] = s[t--];
+
+            s[++t] = x;
+        }
+    }
+
+    while(t != -1)
+        out[j++] = s[t--];
+
+    out[j] = '\0';
+
+    for(i = 0; i < j; i++)
+        rev[i] = out[j-1-i];
+
+    rev[j] = '\0';
+
+    printf("Prefix: %s", rev);
+}
+
+// 3. POSTFIX TO INFIX
+void postfixInfix(char exp[])
+{
+    char a[50], b[50], temp[50];
+    int i;
+
+    top = -1;
+
+    for(i = 0; exp[i] != '\0'; i++)
+    {
+        if(isalnum(exp[i]))
+        {
+            temp[0] = exp[i];
+            temp[1] = '\0';
+            push(temp);
+        }
+        else
+        {
+            pop(b);
+            pop(a);
+
+            sprintf(temp, "(%s%c%s)", a, exp[i], b);
+
+            push(temp);
+        }
+    }
+
+    printf("Infix: %s", stack[top]);
+}
+
+// 4. PREFIX TO INFIX
+void prefixInfix(char exp[])
+{
+    char a[50], b[50], temp[50];
+    int i;
+
+    top = -1;
+
+    for(i = strlen(exp)-1; i >= 0; i--)
+    {
+        if(isalnum(exp[i]))
+        {
+            temp[0] = exp[i];
+            temp[1] = '\0';
+            push(temp);
+        }
+        else
+        {
+            pop(a);
+            pop(b);
+
+            sprintf(temp, "(%s%c%s)", a, exp[i], b);
+
+            push(temp);
+        }
+    }
+
+    printf("Infix: %s", stack[top]);
+}
+
+// 5. POSTFIX TO PREFIX
+void postfixPrefix(char exp[])
+{
+    char a[50], b[50], temp[50];
+    int i;
+
+    top = -1;
+
+    for(i = 0; exp[i] != '\0'; i++)
+    {
+        if(isalnum(exp[i]))
+        {
+            temp[0] = exp[i];
+            temp[1] = '\0';
+            push(temp);
+        }
+        else
+        {
+            pop(b);
+            pop(a);
+
+            sprintf(temp, "%c%s%s", exp[i], a, b);
+
+            push(temp);
+        }
+    }
+
+    printf("Prefix: %s", stack[top]);
+}
+
+// 6. PREFIX TO POSTFIX
+void prefixPostfix(char exp[])
+{
+    char a[50], b[50], temp[50];
+    int i;
+
+    top = -1;
+
+    for(i = strlen(exp)-1; i >= 0; i--)
+    {
+        if(isalnum(exp[i]))
+        {
+            temp[0] = exp[i];
+            temp[1] = '\0';
+            push(temp);
+        }
+        else
+        {
+            pop(a);
+            pop(b);
+
+            sprintf(temp, "%s%s%c", a, b, exp[i]);
+
+            push(temp);
+        }
+    }
+
+    printf("Postfix: %s", stack[top]);
+}
+
+// MAIN FUNCTION
+int main()
+{
+    int choice;
+    char exp[50];
+
+    printf("\n--- EXPRESSION CONVERSION ---");
+
+    printf("\n1. Infix to Postfix");
+    printf("\n2. Infix to Prefix");
+    printf("\n3. Postfix to Infix");
+    printf("\n4. Prefix to Infix");
+    printf("\n5. Postfix to Prefix");
+    printf("\n6. Prefix to Postfix");
+
+    printf("\nEnter choice: ");
+    scanf("%d", &choice);
+
+    printf("Enter expression: ");
+    scanf("%49s", exp);
+
+    switch(choice)
+    {
+        case 1:
+            infixPostfix(exp);
+            break;
+
+        case 2:
+            infixPrefix(exp);
+            break;
+
+        case 3:
+            postfixInfix(exp);
+            break;
+
+        case 4:
+            prefixInfix(exp);
+            break;
+
+        case 5:
+            postfixPrefix(exp);
+            break;
+
+        case 6:
+            prefixPostfix(exp);
+            break;
+
+        default:
+            printf("Invalid choice!");
+    }
+
+    return 0;
+}

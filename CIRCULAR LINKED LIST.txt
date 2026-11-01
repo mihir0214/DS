@@ -1,0 +1,129 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct node {
+    int coeff, exp;
+    struct node *next;
+};
+
+struct node *create() {
+    struct node *head, *last, *n;
+    int i, terms;
+
+    head = malloc(sizeof(struct node));
+    head->next = head;
+    last = head;
+
+    printf("Enter number of terms: ");
+    scanf("%d", &terms);
+
+    for (i = 0; i < terms; i++) {
+        n = malloc(sizeof(struct node));
+
+        printf("Enter coefficient and exponent: ");
+        scanf("%d%d", &n->coeff, &n->exp);
+
+        n->next = head;
+        last->next = n;
+        last = n;
+    }
+
+    return head;
+}
+
+void display(struct node *head) {
+    struct node *t = head->next;
+
+    if (t == head) {
+        printf("0");
+        return;
+    }
+
+    while (t != head) {
+        printf("%dx^%d", t->coeff, t->exp);
+        t = t->next;
+
+        if (t != head)
+            printf(" + ");
+    }
+    printf("\n");
+}
+
+struct node *add(struct node *p, struct node *q) {
+    struct node *r, *last, *n, *a, *b;
+
+    r = malloc(sizeof(struct node));
+    r->next = r;
+    last = r;
+
+    a = p->next;
+    b = q->next;
+
+    while (a != p && b != q) {
+        n = malloc(sizeof(struct node));
+
+        if (a->exp == b->exp) {
+            n->coeff = a->coeff + b->coeff;
+            n->exp = a->exp;
+            a = a->next;
+            b = b->next;
+        } else if (a->exp > b->exp) {
+            n->coeff = a->coeff;
+            n->exp = a->exp;
+            a = a->next;
+        } else {
+            n->coeff = b->coeff;
+            n->exp = b->exp;
+            b = b->next;
+        }
+
+        n->next = r;
+        last->next = n;
+        last = n;
+    }
+
+    while (a != p) {
+        n = malloc(sizeof(struct node));
+        n->coeff = a->coeff;
+        n->exp = a->exp;
+        n->next = r;
+        last->next = n;
+        last = n;
+        a = a->next;
+    }
+
+    while (b != q) {
+        n = malloc(sizeof(struct node));
+        n->coeff = b->coeff;
+        n->exp = b->exp;
+        n->next = r;
+        last->next = n;
+        last = n;
+        b = b->next;
+    }
+
+    return r;
+}
+
+int main() {
+    struct node *p, *q, *result;
+
+    printf("First Polynomial:\n");
+    p = create();
+
+    printf("Second Polynomial:\n");
+    q = create();
+
+    printf("\nFirst Polynomial: ");
+    display(p);
+
+    printf("Second Polynomial: ");
+    display(q);
+
+    result = add(p, q);
+
+    printf("Addition Result: ");
+    display(result);
+
+    return 0;
+}
